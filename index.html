@@ -770,6 +770,11 @@ textarea.problem-input::placeholder {
     <h2>What kinds of knowledge does the problem <em>need?</em></h2>
     <p class="lede">Most problems need more than one; pick the one or two that feel most central. A symptom management problem leans on <strong>empirics</strong>; a communication problem on <strong>esthetics and personal knowing</strong>; an end-of-life problem almost always requires <strong>ethics</strong>.</p>
 
+    <div class="suggestion" id="knowingSuggestionBanner" hidden>
+      <div class="suggestion-label">Suggested from your problem and framing</div>
+      <div class="suggestion-body" id="knowingSuggestionBody"></div>
+    </div>
+
     <div class="options" id="knowingOptions">
       <button class="option" data-value="empirics" type="button">
         <div class="option-title">Empirics</div>
@@ -1134,7 +1139,10 @@ const KEYWORD_HINTS = {
     'organizational', 'staffing', 'burnout', 'system', 'systems', 'technology',
     'telehealth', 'telemedicine', 'immigrant', 'refugee', 'homeless',
     'underserved', 'rural', 'safety net', 'low-income', 'low income',
-    'school health', 'workplace', 'occupational'
+    'school health', 'workplace', 'occupational', 'workplace violence',
+    'lateral violence', 'horizontal violence', 'bullying', 'incivility',
+    'patient violence', 'aggression', 'assault', 'safety culture',
+    'just culture', 'moral distress', 'moral injury'
   ]
 };
 
@@ -1199,6 +1207,135 @@ function maybeSuggestProblemType() {
   banner.hidden = false;
 }
 
+// ============================================================
+// KNOWING SUGGESTION
+// Combines (a) the confirmed problem type with (b) keyword spotting
+// across the problem text to suggest 1 or 2 patterns of knowing.
+// ============================================================
+
+// Baseline weights: each problem type has a center of gravity
+// across Carper's four patterns. Numbers are tunable.
+const PROBLEM_TYPE_KNOWING_PRIOR = {
+  symptom:       { empirics: 3, ethics: 0, esthetics: 1, personal: 0 },
+  adaptive:      { empirics: 2, ethics: 0, esthetics: 0, personal: 2 },
+  experiential:  { empirics: 0, ethics: 1, esthetics: 3, personal: 3 },
+  motivational:  { empirics: 2, ethics: 0, esthetics: 0, personal: 2 },
+  institutional: { empirics: 1, ethics: 3, esthetics: 0, personal: 0 }
+};
+
+const KNOWING_KEYWORDS = {
+  empirics: [
+    'measure', 'measurable', 'outcome', 'outcomes', 'evidence', 'evidence-based',
+    'trial', 'rct', 'data', 'instrument', 'scale', 'score', 'efficacy',
+    'effectiveness', 'protocol', 'guideline', 'guidelines', 'intervention',
+    'reduce', 'decrease', 'increase', 'improve', 'a1c', 'bmi', 'blood pressure',
+    'mortality', 'morbidity', 'readmission', 'incidence', 'prevalence'
+  ],
+  ethics: [
+    'dignity', 'advocacy', 'advocate', 'equity', 'justice', 'rights', 'autonomy',
+    'consent', 'disparities', 'disparity', 'unjust', 'injustice', 'ethical',
+    'ethic', 'ethics', 'moral', 'morality', 'end of life', 'end-of-life',
+    'palliative', 'futility', 'beneficence', 'nonmaleficence', 'social determinants',
+    'sdoh', 'marginalized', 'vulnerable', 'oppression', 'power', 'underserved',
+    'violence', 'workplace violence', 'lateral violence', 'bullying',
+    'incivility', 'harm', 'safety', 'unsafe', 'abuse', 'moral distress',
+    'moral injury'
+  ],
+  esthetics: [
+    'presence', 'encounter', 'art', 'attunement', 'moment', 'touch', 'caring',
+    'compassion', 'aesthetic', 'esthetic', 'beautiful', 'graceful', 'rhythm',
+    'gesture', 'silence', 'witnessing', 'witness', 'expressive'
+  ],
+  personal: [
+    'story', 'stories', 'narrative', 'lived experience', 'meaning', 'identity',
+    'relationship', 'relational', 'trust', 'rapport', 'know the patient',
+    'knowing the patient', 'understand', 'understanding', 'authentic', 'self',
+    'self-awareness', 'voice', 'whole person', 'whole-person'
+  ]
+};
+
+function suggestKnowing(text, problemType) {
+  // Start from the problem-type prior
+  const prior = PROBLEM_TYPE_KNOWING_PRIOR[problemType] || { empirics: 0, ethics: 0, esthetics: 0, personal: 0 };
+  const scores = { ...prior };
+  const matched = { empirics: [], ethics: [], esthetics: [], personal: [] };
+
+  // Add keyword hits from the problem text
+  if (text && text.trim()) {
+    const normalized = ' ' + text.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ') + ' ';
+    Object.entries(KNOWING_KEYWORDS).forEach(([pattern, words]) => {
+      words.forEach(w => {
+        const probe = ' ' + w + ' ';
+        if (normalized.includes(probe)) {
+          scores[pattern] += w.includes(' ') ? 2 : 1;
+          matched[pattern].push(w);
+        }
+      });
+    });
+  }
+
+  // Rank patterns by score
+  const ranked = Object.entries(scores)
+    .filter(([, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  if (!ranked.length) return null;
+
+  // Top pattern
+  const top = ranked[0];
+  const second = ranked[1];
+
+  // Decide whether to suggest one or two:
+  // Suggest second only if it scores >= 60% of the top AND is non-trivial (>=2)
+  const picks = [top[0]];
+  if (second && second[1] >= 2 && second[1] >= top[1] * 0.6) {
+    picks.push(second[0]);
+  }
+
+  return {
+    picks,
+    matched,
+    scores,
+    fromPrior: prior[top[0]] > 0
+  };
+}
+
+function maybeSuggestKnowing() {
+  const banner = $('#knowingSuggestionBanner');
+  const body = $('#knowingSuggestionBody');
+  if (!banner || !body) return;
+
+  const hint = suggestKnowing(state.problem, state.problemType);
+
+  if (!hint) {
+    banner.hidden = true;
+    return;
+  }
+
+  // Only auto-select if the user hasn't already chosen anything
+  if (state.knowing.length === 0) {
+    state.knowing = [...hint.picks];
+    $$('#knowingOptions .option').forEach(b => {
+      b.classList.toggle('selected', hint.picks.includes(b.dataset.value));
+    });
+    refreshNav();
+  }
+
+  // Build the explanation
+  const labels = hint.picks.map(knowingLabel);
+  const labelsText = labels.length === 2 ? `${labels[0]} and ${labels[1]}` : labels[0];
+
+  // Gather any keywords that fired for the picked patterns
+  const allKw = hint.picks.flatMap(p => hint.matched[p]).slice(0, 4);
+  const kwPhrase = allKw.length
+    ? ` Your text mentions ${allKw.map(k => `"${k}"`).join(', ')}, which reinforces this.`
+    : '';
+
+  const framingLabel = problemTypeLabel(state.problemType).toLowerCase();
+  body.innerHTML = `A <strong>${escapeHTML(framingLabel)}</strong> problem typically leans on <strong>${escapeHTML(labelsText)}</strong>.${escapeHTML(kwPhrase)} Confirm or adjust below.`;
+  banner.hidden = false;
+}
+
 const state = {
   step: 1,
   problem: '',
@@ -1242,6 +1379,7 @@ function showStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (n === 2) maybeSuggestProblemType();
+  if (n === 3) maybeSuggestKnowing();
   if (n === 5) renderResults();
 }
 
