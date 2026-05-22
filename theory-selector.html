@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Theory Selector · A Tool for FNP Students</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a2520;
+  --ink-soft: #3d4d46;
+  --ink-mute: #6a7872;
+  --paper: #f4efe6;
+  --paper-warm: #ede5d4;
+  --paper-card: #fbf8f1;
+  --sage: #5a7a6b;
+  --sage-deep: #3d5a4d;
+  --sage-soft: #c4d3c9;
+  --rust: #b85c3a;
+  --rust-soft: #e8c9b8;
+  --border: #d4c9b1;
+  --border-soft: #e4dbc6;
+  --shadow: 0 1px 0 rgba(26,37,32,0.04), 0 2px 12px rgba(26,37,32,0.06);
+  --shadow-lift: 0 1px 0 rgba(26,37,32,0.06), 0 8px 32px rgba(26,37,32,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(196,211,201,0.25), transparent 40%),
+    radial-gradient(circle at 88% 92%, rgba(232,201,184,0.18), transparent 40%);
+}
+
+.shell {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+@media (min-width: 720px) {
+  .shell { padding: 56px 40px 96px; }
+}
+
+/* ---------- Header ---------- */
+.masthead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--sage-deep);
+  display: inline-block;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-variation-settings: 'opsz' 96;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--sage-deep);
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--ink-soft);
+  max-width: 56ch;
+  line-height: 1.5;
+}
+
+/* ---------- Progress strip ---------- */
+.progress {
+  display: flex;
+  gap: 6px;
+  margin: 28px 0 8px;
+}
+
+.progress-step {
+  flex: 1;
+  height: 4px;
+  background: var(--border-soft);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+
+.progress-step.done { background: var(--sage); }
+.progress-step.active { background: var(--sage); }
+.progress-step.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--sage), var(--sage-deep));
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.progress-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ---------- Steps ---------- */
+.step {
+  display: none;
+  animation: fadein 0.5s ease-out;
+}
+
+.step.active { display: block; }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--rust);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+
+.step h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.step h2 em {
+  font-style: italic;
+  color: var(--sage-deep);
+}
+
+.step .lede {
+  font-size: 15.5px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+  max-width: 60ch;
+  line-height: 1.55;
+}
+
+.step .lede a {
+  color: var(--sage-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Form fields ---------- */
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 12px;
+  display: block;
+}
+
+textarea.problem-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 18px 20px;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  line-height: 1.5;
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea.problem-input:focus {
+  outline: none;
+  border-color: var(--sage);
+  box-shadow: 0 0 0 4px rgba(90,122,107,0.12);
+}
+
+textarea.problem-input::placeholder {
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+/* ---------- Option cards ---------- */
+.options {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 600px) {
+  .options.two-col { grid-template-columns: 1fr 1fr; }
+}
+
+.option {
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.option:hover {
+  border-color: var(--sage);
+  background: var(--paper-warm);
+  transform: translateY(-1px);
+}
+
+.option.selected {
+  border-color: var(--sage-deep);
+  background: var(--sage-soft);
+  box-shadow: inset 0 0 0 1px var(--sage-deep);
+}
+
+.option.selected::before {
+  content: '✓';
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  color: var(--sage-deep);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.option-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.option-desc {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.helper {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--ink-mute);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.helper strong {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ---------- Suggestion banner ---------- */
+.suggestion {
+  background: var(--paper-warm);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--rust);
+  border-radius: 3px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  animation: fadein 0.4s ease-out;
+}
+
+.suggestion-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 6px;
+}
+
+.suggestion-body {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.suggestion-body strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.suggestion-keywords {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  margin-top: 6px;
+}
+
+/* ---------- Metaparadigm sliders ---------- */
+.metapara-group {
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.metapara-q {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.metapara-q span {
+  font-style: italic;
+  color: var(--sage-deep);
+  font-weight: 400;
+}
+
+.metapara-hint {
+  font-size: 13px;
+  color: var(--ink-mute);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.metapara-options {
+  display: grid;
+  gap: 8px;
+}
+
+.mp-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: transparent;
+}
+
+.mp-opt:hover {
+  border-color: var(--sage);
+  background: rgba(196,211,201,0.2);
+}
+
+.mp-opt.selected {
+  border-color: var(--sage-deep);
+  background: var(--sage-soft);
+}
+
+.mp-opt input {
+  margin-top: 3px;
+  accent-color: var(--sage-deep);
+  flex-shrink: 0;
+}
+
+.mp-opt-text {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+/* ---------- Nav buttons ---------- */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 12px 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--sage-deep);
+  color: var(--paper);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--border);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+
+.btn .arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover .arrow { transform: translateX(3px); }
+.btn-ghost:hover .arrow.back { transform: translateX(-3px); }
+
+/* ---------- Results ---------- */
+.results-header {
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+}
+
+.summary-quote {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  padding-left: 14px;
+  border-left: 2px solid var(--rust);
+}
+
+.summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 2px;
+  background: var(--sage-soft);
+  color: var(--sage-deep);
+}
+
+.tag.rust { background: var(--rust-soft); color: var(--rust); }
+
+.theory-card {
+  background: var(--paper-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.theory-card:hover {
+  box-shadow: var(--shadow-lift);
+  border-color: var(--sage);
+}
+
+.theory-card.top-pick {
+  border-color: var(--sage-deep);
+  border-width: 1px;
+  background: linear-gradient(180deg, var(--paper-card) 0%, rgba(196,211,201,0.18) 100%);
+}
+
+.theory-card.top-pick::before {
+  content: 'Strongest match';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: var(--sage-deep);
+  color: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+.theory-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.05em;
+}
+
+.theory-name {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 4px 0 4px;
+}
+
+.theory-name em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--sage-deep);
+}
+
+.theory-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 14px;
+}
+
+.theory-blurb {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.theory-fit {
+  font-size: 13.5px;
+  color: var(--ink);
+  background: rgba(196,211,201,0.25);
+  padding: 12px 14px;
+  border-radius: 3px;
+  border-left: 2px solid var(--sage);
+  line-height: 1.5;
+}
+
+.theory-fit strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.theory-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}
+
+.theory-meta span strong {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+.footer-note {
+  margin-top: 36px;
+  padding: 18px 20px;
+  background: var(--paper-warm);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  border-left: 2px solid var(--rust);
+}
+
+.footer-note strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------- Footer ---------- */
+.colophon {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ---------- Sm screens polish ---------- */
+@media (max-width: 480px) {
+  .shell { padding: 24px 18px 60px; }
+  .theory-card { padding: 18px 18px; }
+  .nav-row { flex-direction: row; }
+  .btn { padding: 11px 16px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ========= Masthead ========= -->
+  <header class="masthead">
+    <div class="eyebrow">From Problem to Theory</div>
+    <h1>Choosing a <em>nursing theory</em><br>for a problem you care about.</h1>
+    <p class="subtitle">Theory follows problem. This guide walks you from a practice problem, through the kind of knowledge it needs, to the grand and middle-range theories whose assumptions are likely to fit.</p>
+  </header>
+
+  <!-- ========= Progress ========= -->
+  <div class="progress" id="progress">
+    <div class="progress-step active" data-step="1"></div>
+    <div class="progress-step" data-step="2"></div>
+    <div class="progress-step" data-step="3"></div>
+    <div class="progress-step" data-step="4"></div>
+    <div class="progress-step" data-step="5"></div>
+  </div>
+  <div class="progress-label">
+    <span id="progressText">Step 1 of 5 · The problem</span>
+    <span id="progressPct">20%</span>
+  </div>
+
+  <!-- ========= STEP 1: Problem ========= -->
+  <section class="step active" data-step="1">
+    <div class="step-num">01 / Begin with the problem</div>
+    <h2>What practice problem do you <em>care about?</em></h2>
+    <p class="lede">Name it concretely. A patient population, a clinical pattern, a recurring frustration. The problem comes first; the theory comes in service of the problem.</p>
+
+    <label for="problem" class="field-label">Your problem (one or two sentences)</label>
+    <textarea id="problem" class="problem-input" placeholder="e.g., Adolescents with newly diagnosed Type 1 diabetes who disengage from self-management within the first year…"></textarea>
+
+    <div class="helper">No wrong answer here. The text is just for your reference on the results page.</div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-primary" data-action="next">Continue <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ========= STEP 2: Problem type ========= -->
+  <section class="step" data-step="2">
+    <div class="step-num">02 / Frame the problem</div>
+    <h2>What <em>kind</em> of problem is this?</h2>
+    <p class="lede">Pick the framing that best fits. You can revisit this; the right framing often clarifies itself once you see which theories surface.</p>
+
+    <div class="suggestion" id="suggestionBanner" hidden>
+      <div class="suggestion-label">Suggested from your description</div>
+      <div class="suggestion-body" id="suggestionBody"></div>
+    </div>
+
+    <div class="options" id="problemTypeOptions">
+      <button class="option" data-value="symptom" type="button">
+        <div class="option-title">Symptom-focused</div>
+        <div class="option-desc">Pain, comfort, dyspnea, fatigue, behavior regulation: concrete clinical phenomena to assess, intervene on, and measure.</div>
+      </button>
+      <button class="option" data-value="adaptive" type="button">
+        <div class="option-title">Adaptive</div>
+        <div class="option-desc">The person is navigating change (illness, transition, stressors, role shifts) and the question is how they're adjusting and what supports adjustment.</div>
+      </button>
+      <button class="option" data-value="experiential" type="button">
+        <div class="option-title">Experiential / Relational</div>
+        <div class="option-desc">Lived experience, meaning-making, suffering, the quality of the nurse–patient encounter itself. Knowing the person matters more than fixing them.</div>
+      </button>
+      <button class="option" data-value="motivational" type="button">
+        <div class="option-title">Motivational / Agency</div>
+        <div class="option-desc">Self-management, health behavior change, self-care capacity. The question turns on what the person can and will do for themselves.</div>
+      </button>
+      <button class="option" data-value="institutional" type="button">
+        <div class="option-title">Institutional / Systems</div>
+        <div class="option-desc">The unit of concern is bigger than the dyad: community health, organizational culture, equity, policy, technology in care, bureaucratic forces.</div>
+      </button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" data-action="back"><span class="arrow back">←</span> Back</button>
+      <button class="btn btn-primary" data-action="next" disabled>Continue <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ========= STEP 3: Patterns of knowing ========= -->
+  <section class="step" data-step="3">
+    <div class="step-num">03 / Patterns of knowing</div>
+    <h2>What kinds of knowledge does the problem <em>need?</em></h2>
+    <p class="lede">Most problems need more than one; pick the one or two that feel most central. A symptom management problem leans on <strong>empirics</strong>; a communication problem on <strong>esthetics and personal knowing</strong>; an end-of-life problem almost always requires <strong>ethics</strong>.</p>
+
+    <div class="options" id="knowingOptions">
+      <button class="option" data-value="empirics" type="button">
+        <div class="option-title">Empirics</div>
+        <div class="option-desc">The science of nursing. Measurable, generalizable, evidence-based. Variables, instruments, mechanisms.</div>
+      </button>
+      <button class="option" data-value="ethics" type="button">
+        <div class="option-title">Ethics</div>
+        <div class="option-desc">The moral component. What ought to be done. Advocacy, dignity, justice, the rightness of an act of care.</div>
+      </button>
+      <button class="option" data-value="esthetics" type="button">
+        <div class="option-title">Esthetics</div>
+        <div class="option-desc">The art of nursing. The aesthetic perception of an encounter, attunement, the well-formed act of caring.</div>
+      </button>
+      <button class="option" data-value="personal" type="button">
+        <div class="option-title">Personal Knowing</div>
+        <div class="option-desc">Knowing the unique other and knowing oneself in relation. Authentic encounter, presence, self-awareness.</div>
+      </button>
+    </div>
+
+    <div class="helper"><strong>Select up to two.</strong> Don't overthink it; the goal is a center of gravity, not a complete map.</div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" data-action="back"><span class="arrow back">←</span> Back</button>
+      <button class="btn btn-primary" data-action="next" disabled>Continue <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ========= STEP 4: Metaparadigm ========= -->
+  <section class="step" data-step="4">
+    <div class="step-num">04 / Your view of nursing's metaparadigm</div>
+    <h2>What do <em>you</em> believe about person, environment, health, and nursing?</h2>
+    <p class="lede">A theory whose assumptions clash with your own beliefs will frustrate you in practice. For each concept, pick the statement closest to your view.</p>
+
+    <div class="metapara-group">
+      <div class="metapara-q">A <span>person</span> is fundamentally…</div>
+      <div class="metapara-hint">Different theories assume different ontologies. Roy's biopsychosocial system and Rogers' irreducible unitary being lead to very different practice.</div>
+      <div class="metapara-options" data-mp="person">
+        <label class="mp-opt"><input type="radio" name="person" value="system" /><span class="mp-opt-text">A biopsychosocial / behavioral system with interacting parts that can be assessed and stabilized.</span></label>
+        <label class="mp-opt"><input type="radio" name="person" value="agent" /><span class="mp-opt-text">A self-determining agent capable of self-care, health behavior, and growth.</span></label>
+        <label class="mp-opt"><input type="radio" name="person" value="relational" /><span class="mp-opt-text">A relational being, known and constituted through caring connection with others.</span></label>
+        <label class="mp-opt"><input type="radio" name="person" value="holistic" /><span class="mp-opt-text">An irreducible whole, whose meaning, spirit, and story cannot be decomposed into parts.</span></label>
+      </div>
+    </div>
+
+    <div class="metapara-group">
+      <div class="metapara-q">The <span>environment</span> matters most as…</div>
+      <div class="metapara-hint">Stressors to defend against, a cultural world to be congruent with, a political/organizational structure, or a caring milieu?</div>
+      <div class="metapara-options" data-mp="environment">
+        <label class="mp-opt"><input type="radio" name="environment" value="stressors" /><span class="mp-opt-text">A source of stressors and stimuli the person adapts to.</span></label>
+        <label class="mp-opt"><input type="radio" name="environment" value="cultural" /><span class="mp-opt-text">A cultural and social world that shapes meaning and expectations of care.</span></label>
+        <label class="mp-opt"><input type="radio" name="environment" value="political" /><span class="mp-opt-text">An organizational, economic, and political structure that constrains and enables.</span></label>
+        <label class="mp-opt"><input type="radio" name="environment" value="caring" /><span class="mp-opt-text">A caring field, the relational, spiritual atmosphere within which care happens.</span></label>
+      </div>
+    </div>
+
+    <div class="metapara-group">
+      <div class="metapara-q"><span>Health</span> is best understood as…</div>
+      <div class="metapara-hint">Theories diverge sharply here. Adaptation, comfort, wholeness, transcendence: these are different ends.</div>
+      <div class="metapara-options" data-mp="health">
+        <label class="mp-opt"><input type="radio" name="health" value="adaptation" /><span class="mp-opt-text">Successful adaptation, balance, or system stabilization.</span></label>
+        <label class="mp-opt"><input type="radio" name="health" value="comfort" /><span class="mp-opt-text">Relief from distress; comfort across physical, psycho-spiritual, and social dimensions.</span></label>
+        <label class="mp-opt"><input type="radio" name="health" value="wholeness" /><span class="mp-opt-text">Wholeness, meaning, and harmony, including in suffering and at the end of life.</span></label>
+        <label class="mp-opt"><input type="radio" name="health" value="transcendence" /><span class="mp-opt-text">Growth, self-transcendence, the unfolding of human potential.</span></label>
+      </div>
+    </div>
+
+    <div class="metapara-group">
+      <div class="metapara-q"><span>Nursing</span>, at its core, is…</div>
+      <div class="metapara-hint">A science, an art, a system intervention, or moral-political advocacy? Most theories blend these but lead with one.</div>
+      <div class="metapara-options" data-mp="nursing">
+        <label class="mp-opt"><input type="radio" name="nursing" value="science" /><span class="mp-opt-text">An applied science: assessing, intervening, evaluating to achieve measurable outcomes.</span></label>
+        <label class="mp-opt"><input type="radio" name="nursing" value="caring" /><span class="mp-opt-text">A relational art of caring: presence, intention, and the well-formed caring moment.</span></label>
+        <label class="mp-opt"><input type="radio" name="nursing" value="systems" /><span class="mp-opt-text">A practice of systems and quality: coordinating, optimizing, structuring care.</span></label>
+        <label class="mp-opt"><input type="radio" name="nursing" value="advocacy" /><span class="mp-opt-text">A morally engaged practice: advocating for individuals and communities, including against structural harm.</span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" data-action="back"><span class="arrow back">←</span> Back</button>
+      <button class="btn btn-primary" data-action="next" disabled>See recommendations <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ========= STEP 5: Results ========= -->
+  <section class="step" data-step="5">
+    <div class="step-num">05 / Theories worth considering</div>
+    <h2>Theories that <em>fit your problem</em>, ranked by alignment.</h2>
+    <p class="lede">Top matches first. Each card explains why the theory fits, and where it might pull you. Multiple theories may work; read the top two or three side by side before committing.</p>
+
+    <div class="summary-card" id="summaryCard"></div>
+
+    <div id="theoryResults"></div>
+
+    <div class="footer-note">
+      <strong>A reminder.</strong> This tool is a thinking aid, not a verdict. The patterns of knowing are heuristic; most clinical problems need more than one. And theory fit is iterative: try framing your problem with your top match, then with your second. The friction between them is often where the real intellectual work happens.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" data-action="restart"><span class="arrow back">↺</span> Start over</button>
+      <button class="btn btn-ghost" data-action="back"><span class="arrow back">←</span> Adjust answers</button>
+    </div>
+  </section>
+
+  <div class="colophon">
+    <span>Theory Selector · v1</span>
+    <span>For Graduate FNP Study</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// THEORY DATABASE
+// Each theory tagged with:
+//   level: grand | middle-range
+//   problem_types: array of fit problem types
+//   knowing: which patterns of knowing it foregrounds
+//   metaparadigm: { person, environment, health, nursing }
+//   blurb: 1-2 sentences
+//   fit: why it fits the selected profile (uses placeholders)
+// ============================================================
+const THEORIES = [
+  // ---------- Grand: Integrative/Interactive ----------
+  {
+    id: 'johnson',
+    name: 'Johnson’s Behavioral System Model',
+    level: 'grand',
+    problem_types: ['symptom', 'adaptive'],
+    knowing: ['empirics'],
+    mp: { person: 'system', environment: 'stressors', health: 'adaptation', nursing: 'science' },
+    blurb: 'The person is a behavioral system of seven interacting subsystems (attachment, dependency, ingestive, eliminative, sexual, aggressive, achievement). Nursing maintains or restores behavioral system balance.',
+    fit: 'Strong fit for problems where behavior (eating, attachment, aggression, achievement-striving) is itself the clinical phenomenon and where stabilization is the goal.'
+  },
+  {
+    id: 'orem',
+    name: 'Orem’s Self-Care Deficit Nursing Theory',
+    level: 'grand',
+    problem_types: ['motivational', 'adaptive', 'symptom'],
+    knowing: ['empirics'],
+    mp: { person: 'agent', environment: 'stressors', health: 'adaptation', nursing: 'science' },
+    blurb: 'Three nested theories (Self-Care, Self-Care Deficit, Nursing Systems) frame practice around the gap between self-care demand and self-care agency. Nursing fills that gap through wholly/partly compensatory or supportive-educative systems.',
+    fit: 'Especially useful where the central question is what the patient can, will, or cannot do for themselves: chronic disease self-management, post-discharge transitions, dependent care of children or elders.'
+  },
+  {
+    id: 'king',
+    name: 'King’s Theory of Goal Attainment',
+    level: 'grand',
+    problem_types: ['motivational', 'adaptive', 'experiential'],
+    knowing: ['personal', 'empirics'],
+    mp: { person: 'agent', environment: 'stressors', health: 'adaptation', nursing: 'science' },
+    blurb: 'Goal attainment arises from mutual goal-setting between nurse and patient in a transactional encounter. Personal, interpersonal, and social systems are the three concentric arenas of practice.',
+    fit: 'Fits problems where the work is collaborative goal-setting under shared decision-making: chronic disease management, advance care planning, behavior change with measurable goals.'
+  },
+  {
+    id: 'roy',
+    name: 'Roy’s Adaptation Model',
+    level: 'grand',
+    problem_types: ['adaptive', 'symptom'],
+    knowing: ['empirics'],
+    mp: { person: 'system', environment: 'stressors', health: 'adaptation', nursing: 'science' },
+    blurb: 'Persons are adaptive biopsychosocial systems responding to stimuli through four adaptive modes: physiologic, self-concept, role function, and interdependence. Nursing promotes adaptation across all four.',
+    fit: 'A workhorse for problems involving major life or health stressors with predictable adaptive demands: new diagnosis, post-surgical recovery, role transitions in illness.'
+  },
+  {
+    id: 'neuman',
+    name: 'Neuman’s Systems Model',
+    level: 'grand',
+    problem_types: ['institutional', 'adaptive', 'symptom'],
+    knowing: ['empirics'],
+    mp: { person: 'system', environment: 'stressors', health: 'adaptation', nursing: 'systems' },
+    blurb: 'The client system (individual, family, community) is protected by lines of defense and resistance against stressors. Nursing intervenes at primary, secondary, and tertiary levels of prevention.',
+    fit: 'Especially apt where prevention is the frame: population health, community interventions, occupational health, family-as-client work.'
+  },
+  // ---------- Grand: Caring ----------
+  {
+    id: 'leininger',
+    name: 'Leininger’s Culture Care Diversity and Universality',
+    level: 'grand',
+    problem_types: ['experiential', 'institutional'],
+    knowing: ['esthetics', 'personal', 'ethics'],
+    mp: { person: 'relational', environment: 'cultural', health: 'wholeness', nursing: 'caring' },
+    blurb: 'Care is culturally constituted. The Sunrise Enabler maps how worldview, kinship, religion, politics, economics, and language shape care expectations. Three modes: cultural care preservation, accommodation, and repatterning.',
+    fit: 'Indispensable when culture, language, religion, immigration status, or ethnic identity is centrally shaping the encounter, and when "culturally competent care" is not just a checkbox but the substance of the problem.'
+  },
+  {
+    id: 'watson',
+    name: 'Watson’s Theory of Unitary Caring Science',
+    level: 'grand',
+    problem_types: ['experiential', 'institutional'],
+    knowing: ['esthetics', 'personal', 'ethics'],
+    mp: { person: 'holistic', environment: 'caring', health: 'wholeness', nursing: 'caring' },
+    blurb: 'Caring is the moral ideal and ontological foundation of nursing. The ten Caritas Processes structure transpersonal caring moments: moments of authentic connection that transcend the immediate task.',
+    fit: 'A canonical choice for problems centering on the quality of the human encounter: suffering, dying, dignity in chronic illness, the moral atmosphere of a unit or clinic.'
+  },
+  {
+    id: 'boykin',
+    name: 'Boykin & Schoenhofer’s Nursing as Caring',
+    level: 'grand',
+    problem_types: ['experiential'],
+    knowing: ['esthetics', 'personal', 'ethics'],
+    mp: { person: 'relational', environment: 'caring', health: 'wholeness', nursing: 'caring' },
+    blurb: 'All persons are caring by virtue of being human. Nursing is the lived experience of caring between; nurses respond to calls for caring within unique nursing situations.',
+    fit: 'Best where the practice question is fundamentally about how to be present with another, and where measurable outcomes feel reductive of what actually matters.'
+  },
+  // ---------- Middle-range ----------
+  {
+    id: 'meleis',
+    name: 'Meleis’ Transitions Theory',
+    level: 'middle-range',
+    problem_types: ['adaptive', 'experiential', 'motivational'],
+    knowing: ['empirics', 'personal'],
+    mp: { person: 'agent', environment: 'stressors', health: 'adaptation', nursing: 'science' },
+    blurb: 'Transitions (developmental, situational, health-illness, organizational) have properties (awareness, engagement, change, time span, critical points) and conditions (personal, community, societal) that shape patterns of response.',
+    fit: 'A precise tool for problems framed around a transition: new diagnosis, immigration, becoming a caregiver, role change, end of treatment. Strong for both research and practice mapping.'
+  },
+  {
+    id: 'kolcaba',
+    name: 'Kolcaba’s Comfort Theory',
+    level: 'middle-range',
+    problem_types: ['symptom', 'experiential'],
+    knowing: ['empirics', 'esthetics'],
+    mp: { person: 'holistic', environment: 'stressors', health: 'comfort', nursing: 'caring' },
+    blurb: 'Comfort = relief + ease + transcendence, in four contexts: physical, psychospiritual, environmental, sociocultural. A holistic outcome with measurable subscales.',
+    fit: 'Excellent for symptom-management problems (pain, nausea, dyspnea, end-of-life care) where you want a holistic outcome without abandoning measurability.'
+  },
+  {
+    id: 'duffy',
+    name: 'Duffy’s Quality-Caring Model',
+    level: 'middle-range',
+    problem_types: ['institutional', 'experiential'],
+    knowing: ['empirics', 'ethics'],
+    mp: { person: 'relational', environment: 'political', health: 'adaptation', nursing: 'systems' },
+    blurb: 'Eight caring factors organize relationship-centered professional encounters and link caring relationships to quality outcomes. Bridges humanistic caring and quality/safety frameworks.',
+    fit: 'Fits institutional or unit-level problems (quality and safety outcomes, missed care, staffing, patient experience) without surrendering caring as the substrate of nursing.'
+  },
+  {
+    id: 'reed',
+    name: 'Reed’s Theory of Self-Transcendence',
+    level: 'middle-range',
+    problem_types: ['adaptive', 'experiential', 'motivational'],
+    knowing: ['personal', 'esthetics'],
+    mp: { person: 'holistic', environment: 'caring', health: 'transcendence', nursing: 'caring' },
+    blurb: 'In situations of vulnerability (aging, end-of-life, chronic illness, mental health crisis) the capacity to expand self-boundaries (inward, outward, temporal, transpersonal) supports well-being.',
+    fit: 'Particularly suited to older adults, end-of-life, serious illness, and growth-through-suffering questions. Also strong in mental health.'
+  },
+  {
+    id: 'liehr-smith',
+    name: 'Liehr & Smith’s Story Theory',
+    level: 'middle-range',
+    problem_types: ['experiential', 'adaptive'],
+    knowing: ['esthetics', 'personal'],
+    mp: { person: 'holistic', environment: 'caring', health: 'wholeness', nursing: 'caring' },
+    blurb: 'Three concepts: intentional dialogue, connecting with self-in-relation, creating ease. Nursing emerges in the unfolding of the patient’s story about a health challenge.',
+    fit: 'Best for problems where narrative, meaning, and the patient’s own framing of the issue is the substance: chronic illness, mental health, identity work.'
+  },
+  {
+    id: 'parker-barry',
+    name: 'Parker & Barry’s Community Nursing Practice Model',
+    level: 'middle-range',
+    problem_types: ['institutional'],
+    knowing: ['ethics', 'esthetics'],
+    mp: { person: 'relational', environment: 'political', health: 'wholeness', nursing: 'advocacy' },
+    blurb: 'Concentric circles of empathic concern radiate from individual through family, community, and broader society. Designed for community-based nursing practice with underserved populations.',
+    fit: 'Designed for community-level practice: neighborhood clinics, school health, mobile outreach, vulnerable population programs.'
+  },
+  {
+    id: 'locsin',
+    name: 'Locsin’s Technological Competency as Caring',
+    level: 'middle-range',
+    problem_types: ['institutional', 'experiential'],
+    knowing: ['ethics', 'esthetics'],
+    mp: { person: 'holistic', environment: 'political', health: 'wholeness', nursing: 'caring' },
+    blurb: 'In technologically dense environments, technological competency is a mode of expressing caring, provided the nurse continually attempts to "know persons as whole" amid the machines.',
+    fit: 'A natural choice for ICU, telehealth, AI-assisted care, surgical or procedural areas: anywhere technology threatens to displace the person as the unit of attention.'
+  },
+  {
+    id: 'ray',
+    name: 'Ray’s Theory of Bureaucratic Caring',
+    level: 'middle-range',
+    problem_types: ['institutional'],
+    knowing: ['ethics', 'esthetics'],
+    mp: { person: 'relational', environment: 'political', health: 'wholeness', nursing: 'advocacy' },
+    blurb: 'A holographic model: spiritual-ethical caring at the center, surrounded by economic, political, legal, technological, educational, social-cultural, and physical dimensions of organizational life.',
+    fit: 'Built for the tension between humanistic caring and bureaucratic constraint. Use it for organizational ethics, staffing, finance pressure, leadership, and policy-level practice questions.'
+  },
+  {
+    id: 'troutman',
+    name: 'Troutman-Jordan’s Theory of Successful Aging',
+    level: 'middle-range',
+    problem_types: ['adaptive', 'motivational', 'experiential'],
+    knowing: ['empirics', 'personal'],
+    mp: { person: 'holistic', environment: 'caring', health: 'transcendence', nursing: 'caring' },
+    blurb: 'Successful aging emerges from functional performance, intrapsychic factors, spirituality, and gerotranscendence working together. Designed explicitly for older adult populations.',
+    fit: 'Targeted for problems with older adults: late-life chronic illness, loss, retirement transitions, meaning-making, frailty.'
+  },
+  {
+    id: 'swanson',
+    name: 'Swanson’s Theory of Caring',
+    level: 'middle-range',
+    problem_types: ['experiential', 'symptom'],
+    knowing: ['esthetics', 'personal', 'ethics'],
+    mp: { person: 'relational', environment: 'caring', health: 'wholeness', nursing: 'caring' },
+    blurb: 'Five caring processes: knowing, being with, doing for, enabling, and maintaining belief. Originally derived in perinatal loss but generalized broadly.',
+    fit: 'Particularly strong for problems involving loss, grief, perinatal care, and any encounter where being present with suffering is the central nursing act.'
+  },
+  {
+    id: 'falk-rafael',
+    name: 'Falk-Rafael’s Critical Caring Theory',
+    level: 'middle-range',
+    problem_types: ['institutional'],
+    knowing: ['ethics'],
+    mp: { person: 'relational', environment: 'political', health: 'wholeness', nursing: 'advocacy' },
+    blurb: 'Seven carative health-promoting processes (CHPPs) for public health nursing, integrating caring with critical analysis of power, equity, and social determinants of health.',
+    fit: 'The strongest pick when social determinants, equity, structural injustice, or advocacy are at the heart of the problem: public health nursing par excellence.'
+  },
+  {
+    id: 'eriksson',
+    name: 'Eriksson’s Theory of Caritative Caring',
+    level: 'middle-range',
+    problem_types: ['experiential'],
+    knowing: ['ethics', 'esthetics', 'personal'],
+    mp: { person: 'holistic', environment: 'caring', health: 'wholeness', nursing: 'caring' },
+    blurb: 'Caritas (love and charity) is the core motive of caring. Suffering, health, and caring communion are central concepts; an ontological model of health spans doing, being, and becoming.',
+    fit: 'Fits problems where suffering and the alleviation of suffering (physical, psychic, or spiritual) is the central substance. Strong for end-of-life and existential dimensions of illness.'
+  }
+];
+
+// ============================================================
+// KEYWORD HINTS
+// Light keyword spotting. Whole-word matches in the problem text
+// vote for a problem type. The student can override on step 2.
+// ============================================================
+const KEYWORD_HINTS = {
+  symptom: [
+    'pain', 'nausea', 'dyspnea', 'fatigue', 'sleep', 'insomnia', 'symptom',
+    'symptoms', 'wound', 'comfort', 'discomfort', 'agitation', 'restlessness',
+    'pruritus', 'itch', 'constipation', 'dressing', 'icu', 'hospice',
+    'palliative', 'acute pain', 'chronic pain'
+  ],
+  adaptive: [
+    'transition', 'transitions', 'new diagnosis', 'newly diagnosed', 'recovery',
+    'recovering', 'post-op', 'postoperative', 'postpartum', 'surgery', 'role',
+    'caregiver', 'bereavement', 'adjustment', 'adapting', 'cope', 'coping',
+    'discharge', 'rehab', 'rehabilitation', 'pregnancy', 'menopause'
+  ],
+  experiential: [
+    'suffering', 'dying', 'end of life', 'end-of-life', 'eol', 'grief',
+    'loss', 'meaning', 'story', 'narrative', 'dignity', 'mental health',
+    'depression', 'anxiety', 'ptsd', 'trauma', 'spiritual', 'spirituality',
+    'identity', 'lived experience', 'existential'
+  ],
+  motivational: [
+    'self-management', 'self management', 'self-care', 'self care', 'adhere',
+    'adherence', 'compliance', 'comply', 'noncompliance', 'non-adherence',
+    'behavior change', 'lifestyle', 'motivation', 'motivational', 'smoking',
+    'cessation', 'weight', 'obesity', 'exercise', 'physical activity', 'diet',
+    'nutrition', 'medication adherence', 'glycemic control', 'a1c',
+    'engagement', 'disengage', 'disengagement', 'agency'
+  ],
+  institutional: [
+    'community', 'public health', 'population', 'equity', 'disparities',
+    'disparity', 'social determinants', 'sdoh', 'policy', 'organization',
+    'organizational', 'staffing', 'burnout', 'system', 'systems', 'technology',
+    'telehealth', 'telemedicine', 'immigrant', 'refugee', 'homeless',
+    'underserved', 'rural', 'safety net', 'low-income', 'low income',
+    'school health', 'workplace', 'occupational'
+  ]
+};
+
+function suggestProblemType(text) {
+  if (!text || !text.trim()) return null;
+  const normalized = ' ' + text.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ') + ' ';
+
+  const scores = {};
+  const matched = {};
+  Object.entries(KEYWORD_HINTS).forEach(([type, words]) => {
+    scores[type] = 0;
+    matched[type] = [];
+    words.forEach(w => {
+      // whole-phrase match: bounded by space on both sides
+      const probe = ' ' + w + ' ';
+      if (normalized.includes(probe)) {
+        scores[type] += w.includes(' ') ? 2 : 1; // multi-word phrases weight more
+        matched[type].push(w);
+      }
+    });
+  });
+
+  // Pick the winner if it scores >= 1 and beats runner-up by at least 1
+  const sorted = Object.entries(scores)
+    .filter(([, s]) => s > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  if (!sorted.length) return null;
+  const [topType, topScore] = sorted[0];
+  const runnerUpScore = sorted[1] ? sorted[1][1] : 0;
+
+  // If tied with another type, suppress the suggestion (it's ambiguous)
+  if (topScore === runnerUpScore) return null;
+
+  return { type: topType, keywords: matched[topType], score: topScore };
+}
+
+function maybeSuggestProblemType() {
+  const banner = $('#suggestionBanner');
+  const body = $('#suggestionBody');
+  if (!banner || !body) return;
+
+  const hint = suggestProblemType(state.problem);
+
+  if (!hint) {
+    banner.hidden = true;
+    return;
+  }
+
+  // Only auto-select if the user hasn't already chosen something
+  if (state.problemType === null) {
+    state.problemType = hint.type;
+    $$('#problemTypeOptions .option').forEach(b => {
+      b.classList.toggle('selected', b.dataset.value === hint.type);
+    });
+    refreshNav();
+  }
+
+  const label = problemTypeLabel(hint.type);
+  const kwList = hint.keywords.slice(0, 4).map(k => `"${k}"`).join(', ');
+  body.innerHTML = `Your description mentions <strong>${escapeHTML(kwList)}</strong>, which often points to a <strong>${escapeHTML(label)}</strong> problem. Confirm or pick a different framing below.`;
+  banner.hidden = false;
+}
+
+const state = {
+  step: 1,
+  problem: '',
+  problemType: null,
+  knowing: [],
+  mp: { person: null, environment: null, health: null, nursing: null }
+};
+
+const stepLabels = {
+  1: 'The problem',
+  2: 'Framing',
+  3: 'Patterns of knowing',
+  4: 'Your beliefs',
+  5: 'Recommendations'
+};
+
+// ============================================================
+// DOM HELPERS
+// ============================================================
+function $(sel, root = document) { return root.querySelector(sel); }
+function $$(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+// ============================================================
+// PROGRESS & STEP NAV
+// ============================================================
+function updateProgress() {
+  $$('.progress-step').forEach(el => {
+    const n = parseInt(el.dataset.step, 10);
+    el.classList.remove('active', 'done');
+    if (n < state.step) el.classList.add('done');
+    else if (n === state.step) el.classList.add('active');
+  });
+  $('#progressText').textContent = `Step ${state.step} of 5 · ${stepLabels[state.step]}`;
+  $('#progressPct').textContent = `${Math.round((state.step / 5) * 100)}%`;
+}
+
+function showStep(n) {
+  $$('.step').forEach(el => el.classList.toggle('active', parseInt(el.dataset.step, 10) === n));
+  state.step = n;
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 2) maybeSuggestProblemType();
+  if (n === 5) renderResults();
+}
+
+function canAdvance() {
+  if (state.step === 1) return state.problem.trim().length > 0;
+  if (state.step === 2) return state.problemType !== null;
+  if (state.step === 3) return state.knowing.length >= 1 && state.knowing.length <= 2;
+  if (state.step === 4) return Object.values(state.mp).every(v => v !== null);
+  return true;
+}
+
+function refreshNav() {
+  const current = $(`.step[data-step="${state.step}"]`);
+  if (!current) return;
+  const next = current.querySelector('[data-action="next"]');
+  if (next) next.disabled = !canAdvance();
+}
+
+// ============================================================
+// STEP 1: problem text
+// ============================================================
+$('#problem').addEventListener('input', (e) => {
+  state.problem = e.target.value;
+  refreshNav();
+});
+
+// ============================================================
+// STEP 2: problem type (single select)
+// ============================================================
+$$('#problemTypeOptions .option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('#problemTypeOptions .option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.problemType = btn.dataset.value;
+    refreshNav();
+  });
+});
+
+// ============================================================
+// STEP 3: knowing (multi-select, max 2)
+// ============================================================
+$$('#knowingOptions .option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.value;
+    const idx = state.knowing.indexOf(v);
+    if (idx >= 0) {
+      state.knowing.splice(idx, 1);
+      btn.classList.remove('selected');
+    } else {
+      if (state.knowing.length >= 2) {
+        // remove the oldest
+        const oldest = state.knowing.shift();
+        const oldBtn = $$('#knowingOptions .option').find(b => b.dataset.value === oldest);
+        if (oldBtn) oldBtn.classList.remove('selected');
+      }
+      state.knowing.push(v);
+      btn.classList.add('selected');
+    }
+    refreshNav();
+  });
+});
+
+// ============================================================
+// STEP 4: metaparadigm
+// ============================================================
+$$('.metapara-options').forEach(group => {
+  const key = group.dataset.mp;
+  group.addEventListener('change', (e) => {
+    if (e.target.matches('input[type="radio"]')) {
+      state.mp[key] = e.target.value;
+      $$('.mp-opt', group).forEach(l => l.classList.remove('selected'));
+      e.target.closest('.mp-opt').classList.add('selected');
+      refreshNav();
+    }
+  });
+});
+
+// ============================================================
+// NAV BUTTONS
+// ============================================================
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  if (action === 'next' && canAdvance()) {
+    showStep(state.step + 1);
+  } else if (action === 'back') {
+    showStep(Math.max(1, state.step - 1));
+  } else if (action === 'restart') {
+    location.reload();
+  }
+});
+
+// ============================================================
+// SCORING
+// ============================================================
+function scoreTheory(t) {
+  let s = 0;
+  const reasons = [];
+
+  // Problem type match (heavy weight)
+  if (t.problem_types.includes(state.problemType)) {
+    s += 4;
+    reasons.push('problem-type');
+  }
+
+  // Knowing overlap (per pattern)
+  let knowingHits = 0;
+  state.knowing.forEach(k => {
+    if (t.knowing.includes(k)) {
+      knowingHits++;
+    }
+  });
+  if (knowingHits > 0) {
+    s += knowingHits * 2;
+    reasons.push('knowing');
+  }
+
+  // Metaparadigm alignment, each match worth 1
+  let mpHits = 0;
+  ['person','environment','health','nursing'].forEach(k => {
+    if (state.mp[k] && t.mp[k] === state.mp[k]) mpHits++;
+  });
+  s += mpHits;
+  if (mpHits >= 2) reasons.push('mp-strong');
+  else if (mpHits === 1) reasons.push('mp-partial');
+
+  return { score: s, mpHits, knowingHits, reasons };
+}
+
+function buildFitNote(t, scoring) {
+  const bits = [];
+
+  if (scoring.reasons.includes('problem-type')) {
+    bits.push(`Framing this as a ${problemTypeLabel(state.problemType).toLowerCase()} problem is exactly where this theory does its work.`);
+  } else {
+    bits.push(`This theory wasn't built primarily for ${problemTypeLabel(state.problemType).toLowerCase()} problems; use with care.`);
+  }
+
+  if (scoring.knowingHits > 0) {
+    const matched = state.knowing.filter(k => t.knowing.includes(k));
+    bits.push(`It foregrounds ${matched.map(knowingLabel).join(' and ')}, which you said the problem needs.`);
+  } else if (state.knowing.length) {
+    bits.push(`Note: it leans on ${t.knowing.map(knowingLabel).join('/')}, not the patterns you prioritized.`);
+  }
+
+  if (scoring.mpHits >= 3) {
+    bits.push(`Its assumptions about person, environment, health, and nursing line up closely with your own.`);
+  } else if (scoring.mpHits === 2) {
+    bits.push(`Two of its four metaparadigm assumptions match yours; the friction in the other two is worth thinking through.`);
+  } else if (scoring.mpHits === 1) {
+    bits.push(`Only one metaparadigm assumption matches yours; expect philosophical friction.`);
+  } else {
+    bits.push(`Its metaparadigm assumptions diverge from yours; this could be productive disagreement or persistent frustration.`);
+  }
+
+  return bits.join(' ');
+}
+
+function problemTypeLabel(v) {
+  const map = {
+    symptom: 'Symptom-focused',
+    adaptive: 'Adaptive',
+    experiential: 'Experiential / Relational',
+    motivational: 'Motivational / Agency',
+    institutional: 'Institutional / Systems'
+  };
+  return map[v] || v;
+}
+
+function knowingLabel(v) {
+  const map = { empirics: 'empirics', ethics: 'ethics', esthetics: 'esthetics', personal: 'personal knowing' };
+  return map[v] || v;
+}
+
+function mpLabel(dim, val) {
+  const map = {
+    person: { system: 'Person as system', agent: 'Person as agent', relational: 'Person as relational', holistic: 'Person as whole' },
+    environment: { stressors: 'Environment as stressors', cultural: 'Environment as cultural world', political: 'Environment as political structure', caring: 'Environment as caring field' },
+    health: { adaptation: 'Health as adaptation', comfort: 'Health as comfort', wholeness: 'Health as wholeness', transcendence: 'Health as transcendence' },
+    nursing: { science: 'Nursing as science', caring: 'Nursing as caring', systems: 'Nursing as systems', advocacy: 'Nursing as advocacy' }
+  };
+  return map[dim] && map[dim][val] ? map[dim][val] : val;
+}
+
+// ============================================================
+// RENDER RESULTS
+// ============================================================
+function renderResults() {
+  // Summary
+  const summary = $('#summaryCard');
+  const problemText = state.problem.trim() || '(no problem entered)';
+  summary.innerHTML = `
+    <div class="summary-quote">${escapeHTML(problemText)}</div>
+    <div class="summary-tags">
+      <span class="tag rust">${escapeHTML(problemTypeLabel(state.problemType))}</span>
+      ${state.knowing.map(k => `<span class="tag">${escapeHTML(knowingLabel(k))}</span>`).join('')}
+      ${Object.entries(state.mp).map(([dim,val]) => `<span class="tag">${escapeHTML(mpLabel(dim,val))}</span>`).join('')}
+    </div>
+  `;
+
+  // Score all theories
+  const scored = THEORIES.map(t => ({ t, ...scoreTheory(t) }))
+    .sort((a, b) => b.score - a.score);
+
+  // Top 5 with non-trivial scores
+  const top = scored.filter(s => s.score >= 4).slice(0, 5);
+  const fallback = scored.slice(0, 3);
+  const list = top.length > 0 ? top : fallback;
+
+  const container = $('#theoryResults');
+  if (!list.length) {
+    container.innerHTML = '<div class="no-results">No clear match emerged. Try revisiting how you framed the problem.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map((entry, i) => {
+    const t = entry.t;
+    const isTop = i === 0 && entry.score >= 5;
+    return `
+      <article class="theory-card ${isTop ? 'top-pick' : ''}">
+        <div class="theory-rank">${String(i+1).padStart(2,'0')} · alignment score ${entry.score}</div>
+        <h3 class="theory-name">${escapeHTML(t.name)}</h3>
+        <div class="theory-level">${t.level === 'grand' ? 'Grand theory' : 'Middle-range theory'}</div>
+        <p class="theory-blurb">${escapeHTML(t.blurb)}</p>
+        <div class="theory-fit">
+          <strong>Why this fits your profile</strong>
+          ${escapeHTML(buildFitNote(t, entry))}
+        </div>
+        <div class="theory-meta">
+          <span><strong>Problem types:</strong> ${t.problem_types.map(problemTypeLabel).join(', ')}</span>
+          <span><strong>Patterns:</strong> ${t.knowing.map(knowingLabel).join(', ')}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+updateProgress();
+refreshNav();
+</script>
+</body>
+</html>
